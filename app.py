@@ -173,6 +173,7 @@ def run_analysis():
             
             # Get results
             results_df = future.result()
+            st.write("--- DEBUG: Raw Results List ---", results_df)
         
         # Clear progress indicators
         progress_bar.progress(1.0)
@@ -186,11 +187,34 @@ def run_analysis():
         # Split into mobile and desktop results
         if 'success' in results_df.columns:
             # Filter successful results
+            results_df_filtered = results_df[results_df['success'] == True] # Temporarily use a new name
+            st.write("--- DEBUG: Filtered DataFrame (Successful Only) ---", results_df_filtered) # <--- ADD THIS LINE (around line 136)
+        else:
+            results_df_filtered = pd.DataFrame() # Handle case where 'success' column might be missing
+            st.write("--- DEBUG: 'success' column not found in results ---") # <-- ADD THIS LINE TOO
+            # Filter successful results
             results_df = results_df[results_df['success'] == True]
         
-        if len(results_df) == 0:
-            st.error("All requests failed. Check your API key and URLs.")
-            return
+        # Check the length of the *filtered* DataFrame
+        if len(results_df_filtered) == 0:
+            st.error("All requests failed. Check your API key and URLs. See details below.")
+            # Show details of the original DataFrame that contained failures
+            if 'success' in results_df.columns:
+                failed_df = results_df[results_df['success'] == False]
+                if not failed_df.empty:
+                    st.write("--- DEBUG: Failed Request Details ---")
+                    st.dataframe(failed_df[['url', 'strategy', 'error']]) # Display failures
+                else:
+                     st.write("--- DEBUG: No specific failures found, but successful results are empty. Original results:")
+                     st.dataframe(results_df) # Show original if no failures marked but still empty after filter
+            else:
+                st.write("--- DEBUG: Could not filter by success. Original results:")
+                st.dataframe(results_df) # Show original if filtering wasn't possible
+
+            return # Stop execution here
+
+        # IMPORTANT: If successful, continue with the filtered data
+        results_df = results_df_filtered # Assign the filtered data back to results_df
         
         # Create separate dataframes for mobile and desktop
         mobile_df = results_df[results_df['strategy'] == 'mobile'].reset_index(drop=True)
