@@ -8,13 +8,12 @@ from concurrent.futures import ThreadPoolExecutor
 import plotly.express as px
 from typing import List, Dict, Any, Union, Tuple
 import os
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
+try:
+    API_KEY = st.secrets["PAGESPEED_API_KEY"]
+except Exception:
+    API_KEY = None
 # Configuration
-API_KEY = os.getenv("PAGESPEED_API_KEY")
 API_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
 MAX_CONCURRENT_REQUESTS = 5  # Adjust based on API limits
 
