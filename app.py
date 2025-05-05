@@ -106,7 +106,7 @@ def _sidebar():
         * Compare multiple pages side‑by‑side to prioritise optimisation work.
 
         ---
-        *Made with ❤️ by *Adnan Akram
+        **Made with ❤️ by Adnan Akram**
         """
     )
 
