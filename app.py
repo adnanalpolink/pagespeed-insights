@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Tuple
 # CONFIGURATION
 # -------------------------------------------------------------------------------------------------
 API_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
-MAX_CONCURRENT_REQUESTS = 3  # keep concurrency low to avoid PSI quotas / timeouts
+MAX_CONCURRENT_REQUESTS = 3
 
 API_KEY_DEFAULT = None
 try:
@@ -92,15 +92,21 @@ def _sidebar():
     sb.header("Setup")
     sb.markdown(
         """
-        **How to get a PageSpeed Insights API key**
-        1. Open [Google Cloud Console](https://console.cloud.google.com/).
-        2. Create or select a project.
-        3. Go to **APIs & Services → Library** and enable **PageSpeed Insights API**.
-        4. Navigate to **APIs & Services → Credentials** → **Create credentials ➜ API key**.
-        5. Copy the generated key and paste it in the *Google API Key* field on the main screen.
-        
+        **Get a PageSpeed Insights API key**
+
+        If you already have a Google Cloud project, head to the quick‑start page below and create a key:
+        <https://developers.google.com/speed/docs/insights/v5/get-started>
+
+        Paste the key in the *Google API Key* field on the main screen.
+
         ---
-        *Credit: **Adnan Akram***
+        **Why use this tool?**
+        * Measure real‑world performance for both mobile and desktop.
+        * Surface high‑impact metrics (LCP, CLS, TBT) instantly.
+        * Compare multiple pages side‑by‑side to prioritise optimisation work.
+
+        ---
+        *Made with ❤️ by *Adnan Akram
         """
     )
 
