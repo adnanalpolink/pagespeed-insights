@@ -106,7 +106,7 @@ def _sidebar():
         * Compare multiple pages side‑by‑side to prioritise optimisation work.
 
         ---
-        **Made with ❤️ by Adnan Akram**
+        *Credit: **Adnan Akram***
         """
     )
 
@@ -117,7 +117,12 @@ def run_ui():
 
     st.title("PageSpeed Insights Analyzer")
 
-    key_input = st.text_input("Google API Key", value=API_KEY_DEFAULT or "", type="password")
+    key_input = st.text_input(
+        "Google API Key",
+        value=API_KEY_DEFAULT or "",
+        placeholder="Paste your API key here",
+        type="password",
+    )
     urls_raw = st.text_area("Enter URLs (one per line)", height=150)
 
     if st.button("Analyze URLs", type="primary"):
