@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Tuple
 # CONFIGURATION
 # -------------------------------------------------------------------------------------------------
 API_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
-MAX_CONCURRENT_REQUESTS = 3  # lower concurrency to avoid hitting rate limits + timeouts
+MAX_CONCURRENT_REQUESTS = 3  # keep concurrency low to avoid PSI quotas / timeouts
 
 API_KEY_DEFAULT = None
 try:
@@ -17,21 +17,20 @@ try:
 except Exception:
     pass
 
-# Request timeout profile – generous but finite
 HTTP_TIMEOUT = aiohttp.ClientTimeout(total=90, connect=20, sock_read=70)
 
 # -------------------------------------------------------------------------------------------------
-# HELPERS
+# UTILS
 # -------------------------------------------------------------------------------------------------
 
 def _fmt_ms(value: Any) -> str:
     try:
-        return f"{round(float(value) / 1000, 1)} s"
+        return f"{round(float(value) / 1000, 1)} s"
     except Exception:
         return "N/A"
 
 # -------------------------------------------------------------------------------------------------
-# CORE CLASS
+# CORE
 # -------------------------------------------------------------------------------------------------
 class PageSpeedAnalyzer:
     def __init__(self, api_key: str):
@@ -78,18 +77,38 @@ class PageSpeedAnalyzer:
             tasks = [self._call_api(session, u, s) for u in urls for s in ("mobile", "desktop")]
             results: List[Dict[str, Any]] = []
             for coro in asyncio.as_completed(tasks):
-                results.append(await coro)  # gather incrementally → shorter tail latency
+                results.append(await coro)
         df = pd.DataFrame(results)
         if "success" not in df.columns:
             df["success"] = False
         return df
 
 # -------------------------------------------------------------------------------------------------
-# STREAMLIT UI
+# UI
 # -------------------------------------------------------------------------------------------------
+
+def _sidebar():
+    sb = st.sidebar
+    sb.header("Setup")
+    sb.markdown(
+        """
+        **How to get a PageSpeed Insights API key**
+        1. Open [Google Cloud Console](https://console.cloud.google.com/).
+        2. Create or select a project.
+        3. Go to **APIs & Services → Library** and enable **PageSpeed Insights API**.
+        4. Navigate to **APIs & Services → Credentials** → **Create credentials ➜ API key**.
+        5. Copy the generated key and paste it in the *Google API Key* field on the main screen.
+        
+        ---
+        *Credit: **Adnan Akram***
+        """
+    )
+
 
 def run_ui():
     st.set_page_config("PageSpeed Insights Analyzer", "🚀", "wide")
+    _sidebar()
+
     st.title("PageSpeed Insights Analyzer")
 
     key_input = st.text_input("Google API Key", value=API_KEY_DEFAULT or "", type="password")
@@ -106,7 +125,7 @@ def run_ui():
             return
 
         analyzer = PageSpeedAnalyzer(key_input)
-        with st.spinner("Running PageSpeed tests (this can take up to a minute per URL)…"):
+        with st.spinner("Running PageSpeed tests – may take ~1 min per URL…"):
             df = asyncio.run(analyzer.run_batch(urls))
 
         ok_df = df[df.success]
